@@ -51,6 +51,7 @@ CREATE TABLE job_result
     et timestamp without time zone,
     job_queue character varying(100) ,
     job_owner character varying(100) ,
+    job_id character varying(100) ,
     job_name character varying(100) ,
     job_status integer,
     job_cpupercent double precision,
