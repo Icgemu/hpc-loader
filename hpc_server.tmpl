@@ -1,0 +1,134 @@
+{
+    "template": "hpc*",
+	"settings": {
+        "index": {
+            "number_of_shards": "4",
+            "number_of_replicas": "1"
+        }
+    },
+    "mappings": {
+        "_default_": {
+		"properties": {
+			"server": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                },
+                "code": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                },
+                "log": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                },
+                "action": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                },
+				"hourofday": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                },
+				"dayofweek": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                },
+				"time": {
+                    "type": "date",
+                    "format": "yyyyMMdd||epoch_millis"
+                },
+				"from": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                }
+				}
+        },
+        
+        "Req": {
+            "properties": {
+               
+                "sock": {
+                    "type": "long"
+                },
+                "received_from": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                },              
+                "type": {
+                    "type": "long"
+                }
+            }
+        },
+        "Node": {
+            "properties": {
+                "node": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                },              
+                "mem_usage": {
+                    "type": "long"
+                },
+                
+                "disk_usage": {
+                    "type": "double"
+                },
+                
+                "cpu_usage": {
+                    "type": "double"
+                }
+            }
+        },
+        "Job": {
+            "properties": {
+                "exec_vnodes": {
+                    "properties": {
+                        "ncpus": {
+                            "type": "long"
+                        },
+                        "exec_vnode": {
+                            "type": "string",
+                            "index": "not_analyzed"
+                        }
+                    }
+                },
+                "owner": {
+                    "type": "string",
+                    "index": "not_analyzed"
+                },               
+                "resources_used_cpupercent": {
+                    "type": "long"
+                },
+                "resources_used_cput": {
+                    "type": "string","index": "not_analyzed"
+                },
+                "resources_used_mem": {
+                    "type": "string","index": "not_analyzed"
+                },               
+                "exit_status": {
+                    "type": "long"
+                },
+                "request_by": {
+                    "type": "string",
+                    "index": "not_analyzed"
+                },
+                "job_name": {
+                    "type": "string",
+                    "index": "not_analyzed"
+                },
+                "resources_used_ncpus": {
+                    "type": "long"
+                },
+                "resources_used_vmem": {
+                    "type": "string","index": "not_analyzed"
+                },
+                "resources_used_walltime": {
+                    "type": "string","index": "not_analyzed"
+                },                            
+                "queue": {
+                    "type": "string",
+                    "index": "not_analyzed"
+                }
+            }
+        }
+    }
+}
