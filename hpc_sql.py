@@ -8,13 +8,16 @@ from datetime import datetime as dt
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 
-conn = psycopg2.connect(database="hpc", user="eshgfuu", password="oio", host="localhost", port="5432")
+#conn = psycopg2.connect(database="hpc", user="eshgfuu", password="oio", host="localhost", port="5432")
+conn = psycopg2.connect(database="hpc", user="postgres", password="oio", host="168.168.5.2", port="5432")
 cur = conn.cursor()
 
 node_pattern = re.compile(r'\.(\w+)=((\w|\.)+)')
 node_info = ("",-1l,-1.0,-1.0,-1l,0)
 
-es = Elasticsearch()
+#es = Elasticsearch()
+#es = Elasticsearch(['168.168.5.2:19200','192.168.246.1:19200','192.168.246.3:19200','192.168.246.4:19200'])
+es = Elasticsearch(['168.168.5.2:19200'])
 bulk_json = []
 def writeSQl(data):
     #print data
@@ -32,7 +35,12 @@ def writeSQl(data):
 
     timeStamp = create_time/1000
     timeArray = time.localtime(timeStamp)
-    index_name = time.strftime("hpc.%Y.%m", timeArray)
+    index_name = time.strftime("hpc.node.%Y.%m", timeArray)
+    hour = time.strftime("%H", timeArray)
+    week = int(time.strftime("%w", timeArray))
+
+    res['hourofday'] = hour
+    res['dayofweek'] = week
     try:
         source = res
         body = {
@@ -66,8 +74,7 @@ def node(line):
     node, t, cpu, disk, mem, cnt = node_info
 
     if node != node_str and cnt > 0:
-        writeSQl((node, cpu, disk, mem, t, t_now))      
-    
+        writeSQl((node, cpu, disk, mem, t, t_now))
     if match:
         key = match.group(1)
         val = match.group(2)
@@ -79,8 +86,8 @@ def node(line):
             disk = float(val)
         cnt = cnt + 1
         if cnt == 3:
-             writeSQl((node, cpu, disk,mem,t,t_now))
-             node_info = ("",-1l,-1.0,-1.0,-1l,0)
+            writeSQl((node, cpu, disk, mem, t, t_now))
+            node_info = ("", -1l, -1.0, -1.0, -1l, 0)
         else:
             node_info = (node_str, timestamp, cpu, disk, mem, cnt)
 
@@ -209,7 +216,6 @@ if __name__ == "__main__":
         filepath = os.path.join(ROOT, name)
         print filepath
         fead(filepath)
-    
     if len(bulk_json) > 0:
         success, _ = bulk(es, bulk_json, raise_on_error=True)
         del bulk_json[0:len(bulk_json)]

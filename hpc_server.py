@@ -207,7 +207,8 @@ switch = {
     "Hook": hook,
     "Que": que
 }
-es = Elasticsearch()
+#es = Elasticsearch()
+es = Elasticsearch(['168.168.5.2:19200','192.168.246.1:19200','192.168.246.3:19200','192.168.246.4:19200'])
 with open('in/20170604', mode='rb') as stream:
     bulk_json = []
     for line in stream.readlines():
