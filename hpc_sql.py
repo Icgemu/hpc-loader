@@ -8,8 +8,8 @@ from datetime import datetime as dt
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 
-#conn = psycopg2.connect(database="hpc", user="eshgfuu", password="oio", host="localhost", port="5432")
-conn = psycopg2.connect(database="hpc", user="postgres", password="oio", host="168.168.5.2", port="5432")
+conn = psycopg2.connect(database="hpc", user="eshgfuu", password="oio", host="localhost", port="5432")
+#conn = psycopg2.connect(database="hpc", user="postgres", password="oio", host="168.168.5.2", port="5432")
 cur = conn.cursor()
 
 node_pattern = re.compile(r'\.(\w+)=((\w|\.)+)')
