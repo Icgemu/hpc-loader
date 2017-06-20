@@ -110,7 +110,8 @@ def job(line):
     res = {}
     res['job_id'] = job_str
     res['create_time'] = t_str
-    res['update_time'] = dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S')
+    #res['update_time'] = dt.strftime(dt.now(), '%Y-%m-%d %H:%M:%S')
+    res['update_time'] = t_str
     #submit 3 , run 4 , success 0 , failure 1, cancel 2
     res['job_status'] = 3
     if code_str == '0008':
@@ -132,16 +133,31 @@ def job(line):
             match = pattern2.findall(log_str)
             res['job_status'] = 4
             if len(match) > 0:
+                res['job_run_id'] = res['job_id'] + dt.strftime(time_arr, '.%Y%m%d%H%M%S')
                 for item in match:
                     key, val = item
                     res['job_run_node'] = key
                     res['job_run_ncpu'] = int(val)
-                    cur.execute("INSERT INTO job_dispatch(job_id, job_run_node,job_run_ncpu,\
-                        job_status,create_time,update_time)VALUES(%(job_id)s, %(job_run_node)s, %(job_run_ncpu)s, \
-                        %(job_status)s, %(create_time)s,%(update_time)s)", res)
+                    cur.execute("\
+                    INSERT INTO job_dispatch(job_id, job_run_node,job_run_ncpu,job_run_id\
+                        ,job_status,create_time,update_time)VALUES(%(job_id)s, %(job_run_node)s, %(job_run_ncpu)s, \
+                        %(job_run_id)s,%(job_status)s, %(create_time)s,%(update_time)s)\
+                        ", res)
                     cur.execute("update job_submit set job_status=%(job_status)s, \
                         update_time=%(update_time)s where job_id=%(job_id)s", res)
-                    conn.commit()
+                cur.execute("update job_result set job_status=%(job_status)s, \
+                    job_run_id=%(job_run_id)s, update_time=%(update_time)s \
+                    where job_id=%(job_id)s", res)
+                conn.commit()
+        # elif code_str == '0080':
+        elif 'Job to be deleted at request of' in log_str:
+            cur.execute("update job_result set job_status=2,et=%(create_time)s \
+                        ,update_time=%(update_time)s where job_id=%(job_id)s", res)
+            cur.execute("update job_submit set job_status=2, \
+                        update_time=%(update_time)s where job_id=%(job_id)s", res)
+            cur.execute("update job_dispatch set job_status=2, \
+                        update_time=%(update_time)s where job_id=%(job_id)s", res)
+            conn.commit()
 
     elif code_str == '0010':
         for item in log_str.split(' '):
@@ -163,14 +179,18 @@ def job(line):
                 val = long(val)
 
             res[key] = val
-        # cur.execute("select * from job_result where job_id = %(job_id)s ",res)
-        # x = cur.fetchone()
+        
         # if x:
-        js = 0
+        STATUS = 0
         if res['exit_status'] != 0:
-            js = 1
-        res['job_status'] = js
-        cur.execute("update job_result set job_status=%(job_status)s, job_cpupercent=%(resources_used_cpupercent)s\
+            STATUS = 1
+        cur.execute("select job_status from job_result where job_id = %(job_id)s ", res)
+        x = cur.fetchone()
+        if x and x[0] == 2:
+            STATUS = 2
+        res['job_status'] = STATUS
+        cur.execute("update job_result set job_status=%(job_status)s,job_exit_status=%(exit_status)s\
+                , job_cpupercent=%(resources_used_cpupercent)s\
                 , job_ncpu=%(resources_used_ncpus)s, job_cput=%(resources_used_cput)s, job_mem=%(resources_used_mem)s\
                 , job_vmem=%(resources_used_vmem)s, job_walltime=%(resources_used_walltime)s, et=%(create_time)s\
                 , update_time=%(update_time)s where job_id=%(job_id)s", res)
@@ -179,15 +199,6 @@ def job(line):
         cur.execute("update job_dispatch set job_status=%(job_status)s, \
                         update_time=%(update_time)s where job_id=%(job_id)s", res)
         conn.commit()
-    elif code_str == '0080':
-        if 'delete job request received' in log_str:
-            cur.execute("update job_result set job_status=2,et=%(create_time)s \
-                        ,update_time=%(update_time)s where job_id=%(job_id)s", res)
-            cur.execute("update job_submit set job_status=2, \
-                        update_time=%(update_time)s where job_id=%(job_id)s", res)
-            cur.execute("update job_dispatch set job_status=2, \
-                        update_time=%(update_time)s where job_id=%(job_id)s", res)
-            conn.commit()
 
 
 def fead(filepath):
@@ -202,7 +213,8 @@ def fead(filepath):
             if ';Job;' in line:
                 job(line)
             elif ';Node;' in line:
-                node(line)
+                #node(line)
+                pass
 
 
 if __name__ == "__main__":
