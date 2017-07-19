@@ -66,7 +66,11 @@ def node(line):
     node_str = arr_str[4]
     log_str = arr_str[5].strip('\n')
 
-    time_arr = dt.strptime(time_str, '%m/%d/%Y %H:%M:%S')
+    #time_arr = dt.strptime(time_str, '%m/%d/%Y %H:%M:%S')
+    try:
+        time_arr = dt.strptime(time_str, '%m/%d/%Y %H:%M:%S')
+    except ValueError, e:
+        return
     #t_str = dt.strftime(time_arr, '%Y-%m-%d %H:%M:%S')
     timestamp = int(time.mktime(time_arr.timetuple())) * 1000
     t_now = int(time.mktime(dt.now().timetuple())) * 1000
@@ -104,8 +108,10 @@ def job(line):
     # action_str = arr_str[3]
     job_str = arr_str[4]
     log_str = arr_str[5].strip('\n')
-
-    time_arr = dt.strptime(time_str, '%m/%d/%Y %H:%M:%S')
+    try:
+        time_arr = dt.strptime(time_str, '%m/%d/%Y %H:%M:%S')
+    except ValueError, e:
+        return
     t_str = dt.strftime(time_arr, '%Y-%m-%d %H:%M:%S')
     res = {}
     res['job_id'] = job_str
@@ -211,10 +217,11 @@ def fead(filepath):
             # arr_str = line.split(';')
             # action = arr_str[3]
             if ';Job;' in line:
-                job(line)
-            elif ';Node;' in line:
-                #node(line)
+                #job(line)
                 pass
+            elif ';Node;' in line:
+                node(line)
+                # pass
 
 
 if __name__ == "__main__":
