@@ -60,8 +60,11 @@ def node(line):
     time_str = arr_str[0]
     node_str = arr_str[4]
     log_str = arr_str[5].strip('\n')
-
-    time_arr = dt.strptime(time_str, '%m/%d/%Y %H:%M:%S')
+    try:
+        time_arr = dt.strptime(time_str, '%m/%d/%Y %H:%M:%S')
+    except ValueError, e:
+        return
+    
     #t_str = dt.strftime(time_arr, '%Y-%m-%d %H:%M:%S')
     timestamp = int(time.mktime(time_arr.timetuple())) * 1000
     t_now = int(time.mktime(dt.now().timetuple())) * 1000
