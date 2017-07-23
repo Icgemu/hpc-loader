@@ -1,0 +1,36 @@
+{
+  "order": 0,
+  "template": "hpc.job.*",
+  "settings": {
+    "index": {
+      "number_of_shards": "2",
+      "number_of_replicas": "1"
+    }
+  },
+  "mappings": {
+    "_default_": {
+      "properties": {
+        "job_time": {
+          "index": "not_analyzed",
+          "type": "string"
+        },
+        "job_ncpu": {
+          "type": "long"
+        },
+        "job_id": {
+          "index": "not_analyzed",
+          "type": "string"
+        },
+        "job_queue": {
+          "index": "not_analyzed",
+          "type": "string"
+        },
+        "job_owner": {
+          "index": "not_analyzed",
+          "type": "string"
+        }
+      }
+    }
+  },
+  "aliases": {}
+}
